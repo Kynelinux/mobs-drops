@@ -25,7 +25,7 @@
   <div id="table-container">Loading...</div>
 
   <script>
-    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=23151082&single=true&output=csv")
+    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=932525004&single=true&output=csv")
       .then(response => response.text())
       .then(data => {
         const rows = data.split("\n").map(row => row.split(","));
