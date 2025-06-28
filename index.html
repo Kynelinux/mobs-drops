@@ -32,16 +32,19 @@
         tableHTML += "</tr></thead><tbody>";
 
         for (let i = 1; i < rows.length; i++) {
-          const isSeparator = rows[i].some(cell => cell.trim().toLowerCase() === "separator");
-          if (isSeparator) {
-            tableHTML += `<tr><td colspan="${rows[0].length}" style="background:black;height:5px;"></td></tr>`;
+          const row = rows[i];
+          const isSeparatorRow = row[0].trim().toLowerCase() === "separator" &&
+                                 row.slice(1).every(cell => cell.trim() === "");
+
+          if (isSeparatorRow) {
+            tableHTML += `<tr><td colspan="${rows[0].length}" style="background:black;height:5px;padding:0;"></td></tr>`;
             continue;
           }
 
-          if (rows[i].every(cell => cell.trim() === "")) continue;
+          if (row.every(cell => cell.trim() === "")) continue;
 
           tableHTML += "<tr>";
-          rows[i].forEach(cell => {
+          row.forEach(cell => {
             tableHTML += `<td>${cell}</td>`;
           });
           tableHTML += "</tr>";
