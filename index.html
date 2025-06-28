@@ -12,6 +12,12 @@
     table {
       border-collapse: collapse;
     }
+    .black-bar {
+      background: black;
+      height: 5px;
+      padding: 0;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -33,15 +39,12 @@
 
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
-          const isSeparatorRow = row[0].trim().toLowerCase() === "separator" &&
-                                 row.slice(1).every(cell => cell.trim() === "");
+          const isBlackBar = row.every(cell => cell.trim() === "");
 
-          if (isSeparatorRow) {
-            tableHTML += `<tr><td colspan="${rows[0].length}" style="background:black;height:5px;padding:0;"></td></tr>`;
+          if (isBlackBar) {
+            tableHTML += `<tr><td class="black-bar" colspan="${rows[0].length}"></td></tr>`;
             continue;
           }
-
-          if (row.every(cell => cell.trim() === "")) continue;
 
           tableHTML += "<tr>";
           row.forEach(cell => {
