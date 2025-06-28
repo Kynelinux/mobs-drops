@@ -1,97 +1,76 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Mob Drops</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #f1f1f1;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #ffffff;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #2b2b2b;
-        }
-        th, td {
-            border: 1px solid #444;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #333;
-        }
-        tr:nth-child(even) {
-            background-color: #242424;
-        }
-        .separator td {
-            background-color: black !important;
-            height: 5px;
-            padding: 0;
-            border: none;
-        }
-    </style>
+  <title>Mob Drops</title>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #2b2b2b;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+    }
+    tr:nth-child(even):not(.separator) {
+      background-color: #242424;
+    }
+    .separator td {
+      background-color: black;
+      height: 5px;
+      padding: 0;
+      border: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Mob Drops</h1>
-    <table id="mob-drops-table">
-        <thead></thead>
-        <tbody></tbody>
-    </table>
+  <h1>Mob Drops</h1>
+  <div id="table-container">Loading...</div>
 
-    <script>
-        fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=23151082&single=true&output=csv")
-            .then(response => response.text())
-            .then(csv => {
-                const rows = csv.trim().split(/\r?\n/).map(row => row.match(/(".*?"|[^",]+)(?=,|$)/g));
-                const thead = document.querySelector("#mob-drops-table thead");
-                const tbody = document.querySelector("#mob-drops-table tbody");
-
-                if (rows.length === 0) return;
-
-                const headerRow = document.createElement("tr");
-                rows[0].forEach(header => {
-                    const th = document.createElement("th");
-                    th.textContent = header.replace(/_\d+$/, "");
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    const isSeparator = row[0] && row[0].trim().toLowerCase() === "separator" &&
-                                        row.slice(1).every(cell => cell.trim() === "");
-
-                    if (isSeparator) {
-                        const sepRow = document.createElement("tr");
-                        sepRow.className = "separator";
-                        sepRow.innerHTML = `<td colspan="${rows[0].length}"></td>`;
-                        tbody.appendChild(sepRow);
-                        continue;
-                    }
-
-                    if (row.every(cell => cell.trim() === "")) continue;
-
-                    const tr = document.createElement("tr");
-                    row.forEach(cell => {
-                        const td = document.createElement("td");
-                        td.textContent = cell.replace(/^"|"$/g, "");
-                        tr.appendChild(td);
-                    });
-                    tbody.appendChild(tr);
-                }
-            })
-            .catch(error => {
-                document.querySelector("#mob-drops-table").outerHTML = "<p>Error loading data.</p>";
-                console.error("CSV fetch error:", error);
-            });
-    </script>
+  <script>
+    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=23151082&single=true&output=csv")
+      .then(response => response.text())
+      .then(csv => {
+        const rows = csv.trim().split("\n").map(row => row.split(","));
+        let html = "<table><thead><tr>";
+        rows[0].forEach(header => {
+          html += `<th>${header.replace(/_\d+$/, "")}</th>`;
+        });
+        html += "</tr></thead><tbody>";
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (row.every(cell => cell.trim().toLowerCase() === "separator" || cell.trim() === "")) {
+            html += `<tr class="separator"><td colspan="${rows[0].length}"></td></tr>`;
+            continue;
+          }
+          html += "<tr>";
+          row.forEach(cell => {
+            html += `<td>${cell}</td>`;
+          });
+          html += "</tr>";
+        }
+        html += "</tbody></table>";
+        document.getElementById("table-container").innerHTML = html;
+      })
+      .catch(err => {
+        console.error("Failed to load CSV:", err);
+        document.getElementById("table-container").innerText = "Error loading data.";
+      });
+  </script>
 </body>
 </html>
