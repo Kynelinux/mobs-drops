@@ -32,14 +32,17 @@
         tableHTML += "</tr></thead><tbody>";
 
         for (let i = 1; i < rows.length; i++) {
+          const isSeparator = rows[i].some(cell => cell.trim().toLowerCase() === "separator");
+          if (isSeparator) {
+            tableHTML += `<tr><td colspan="${rows[0].length}" style="background:black;height:5px;"></td></tr>`;
+            continue;
+          }
+
           if (rows[i].every(cell => cell.trim() === "")) continue;
+
           tableHTML += "<tr>";
           rows[i].forEach(cell => {
-            if (cell.trim().toLowerCase() === "separator") {
-              tableHTML += `<td colspan="${rows[0].length}" style="background:black;height:5px;"></td>`;
-            } else {
-              tableHTML += `<td>${cell}</td>`;
-            }
+            tableHTML += `<td>${cell}</td>`;
           });
           tableHTML += "</tr>";
         }
