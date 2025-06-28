@@ -1,70 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Mob Drop Table</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <title>Mob Drops</title>
+  <meta charset="UTF-8" />
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    .separator-row td {
-      background-color: black !important;
-      height: 10px;
-      padding: 0;
-      border: none;
+    th, td {
+      color: white;
+      border: 1px solid #ccc;
+      padding: 6px;
+    }
+    table {
+      border-collapse: collapse;
     }
   </style>
 </head>
 <body>
-  <h2>Mob Drop Table</h2>
-  <table id="data-table"></table>
+  <h1>Mob Drops</h1>
+  <div id="table-container">Loading...</div>
 
   <script>
     fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRPeOHz_lYh0s1_ZoiQ5ruNz2wYBPFqDiCXbxzUqgDb5qsd6ZSBws4_xqCKfbhkxTEujqOy1vKrgGHE/pub?gid=23151082&single=true&output=csv")
       .then(response => response.text())
-      .then(csvText => {
-        const results = Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: false
+      .then(data => {
+        const rows = data.split("\n").map(row => row.split(","));
+        let tableHTML = "<table><thead><tr>";
+
+        rows[0].forEach(header => {
+          tableHTML += `<th>${header.replace(/_\d+$/, "")}</th>`;
         });
-        const data = results.data;
 
-        const table = document.getElementById("data-table");
-        table.innerHTML = "";
+        tableHTML += "</tr></thead><tbody>";
 
-        const headers = Object.keys(data[0]);
-        const thead = document.createElement("tr");
-        headers.forEach(header => {
-          const th = document.createElement("th");
-          th.innerText = header;
-          thead.appendChild(th);
-        });
-        table.appendChild(thead);
+        for (let i = 1; i < rows.length; i++) {
+          if (rows[i].every(cell => cell.trim() === "")) continue;
+          tableHTML += "<tr>";
+          rows[i].forEach(cell => {
+            if (cell.trim().toLowerCase() === "separator") {
+              tableHTML += `<td colspan="${rows[0].length}" style="background:black;height:5px;"></td>`;
+            } else {
+              tableHTML += `<td>${cell}</td>`;
+            }
+          });
+          tableHTML += "</tr>";
+        }
 
-        data.forEach(row => {
-          const isSeparator = Object.values(row).every(value => value.trim() === "");
-          const tr = document.createElement("tr");
-
-          if (isSeparator) {
-            tr.className = "separator-row";
-            const td = document.createElement("td");
-            td.colSpan = headers.length;
-            tr.appendChild(td);
-          } else {
-            headers.forEach(header => {
-              const td = document.createElement("td");
-              td.innerText = row[header];
-              tr.appendChild(td);
-            });
-          }
-          table.appendChild(tr);
-        });
+        tableHTML += "</tbody></table>";
+        document.getElementById("table-container").innerHTML = tableHTML;
       })
       .catch(error => {
-        console.error("Error loading CSV:", error);
-        document.getElementById("data-table").innerHTML = "<tr><td>Error loading data.</td></tr>";
+        document.getElementById("table-container").innerHTML = "Error loading data";
+        console.error("CSV fetch error:", error);
       });
   </script>
 </body>
